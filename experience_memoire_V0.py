@@ -5,7 +5,7 @@
 
 import time
 
-print("Vous allez voir et entendre des listes de 5 mots. À la fin de chaque liste, écrivez les mots dans l’ordre où vous les avez vus.")
+print("Vous allez voir des listes de 5 mots. À la fin de chaque liste, écrivez les mots dans l’ordre où vous les avez vus.")
 
 # Mes listes de mots ->
 LISTES = [
