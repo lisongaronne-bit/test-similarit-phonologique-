@@ -22,23 +22,52 @@ def norme(mot) :
     mot = unicodedata.normalize("NFD" , mot)
     return "".join(c for c in mot if unicodedata.category(c) != "Mn")
 
-# fonction qui calcule le score des mots si ils sont à la bonne place
+# fonction qui compte le nombre de lettres à changer pour passer d'un mot à l'autre
+def distance(a, b):
+    precedente = list(range(len(b) + 1))
+    for i, lettre_a in enumerate(a, start=1):
+        actuelle = [i]
+        for j, lettre_b in enumerate(b, start=1):
+            suppression = precedente[j] + 1
+            insertion = actuelle[j - 1] + 1
+            remplacement = precedente[j - 1] + (lettre_a != lettre_b)
+            actuelle.append(min(suppression, insertion, remplacement))
+        precedente = actuelle
+    return precedente[-1]
+
+# fonction qui décide si un mot tapé compte comme juste ->
+# car erreur de synatxe ne veut pas dire erreur de mémoire 
+def mot_accepte(tape, attendu, liste):
+    tape = norme(tape)
+    attendu = norme(attendu)
+    mots_liste = [norme(m) for m in liste]
+
+    if tape == attendu:    # mot exact -> juste
+        return True
+    if tape in mots_liste:  # si c'est un autre mot de la liste alors, faux
+        return False
+    if len(tape) > 1 and tape[-1] in "sx" and tape[:-1] == attendu:
+        return True       # enlève les faute de pluriel (s,x)
+    proches = [m for m in mots_liste if distance(tape, m) <= 1]
+    return proches == [attendu]   # si 1 faute est proche du bon mot alors on la compte juste 
+
+# ça calcule le score des mots si ils sont à la bonne place
 def calculer_score(reponse, liste_correcte) :
     mots = reponse.split()
     score = 0 
     for i, mot in enumerate(mots[:len(liste_correcte)]):
-        if norme(mot) == norme(liste_correcte[i]): 
+        if mot_accepte(mot, liste_correcte[i], liste_correcte):
             score = score + 1
     return score
 
- # ma classe qui contient 3 infos : son code (S1...), sont type et ses 5 mots 
+ # ma classe qui contient les  3 infos importante 
 class ListeMots : 
     def __init__(self, code, type_liste, mots) :
         self.code = code 
         self.type_liste = type_liste
         self.mots = mots 
 
-# classe du participant (son numéro et ses réponses) 
+# classe du participant (son numéro et ses rep) 
 class Participant :
     def __init__(self, numero):
         self.numero = numero
